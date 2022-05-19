@@ -3,63 +3,63 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#ifndef __ALPHA_RESOURCE_HANDLE_HPP
-#define __ALPHA_RESOURCE_HANDLE_HPP
+#ifndef __MOBJECT_SEQUENCER_HANDLE_HPP
+#define __MOBJECT_SEQUENCER_HANDLE_HPP
 
 #include <thallium.hpp>
 #include <memory>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
-#include <alpha/Client.hpp>
-#include <alpha/Exception.hpp>
-#include <alpha/AsyncRequest.hpp>
+#include <mobject/Client.hpp>
+#include <mobject/Exception.hpp>
+#include <mobject/AsyncRequest.hpp>
 
-namespace alpha {
+namespace mobject {
 
 namespace tl = thallium;
 
 class Client;
-class ResourceHandleImpl;
+class SequencerHandleImpl;
 
 /**
- * @brief A ResourceHandle object is a handle for a remote resource
- * on a server. It enables invoking the resource's functionalities.
+ * @brief A SequencerHandle object is a handle for a remote sequencer
+ * on a server. It enables invoking the sequencer's functionalities.
  */
-class ResourceHandle {
+class SequencerHandle {
 
     friend class Client;
 
     public:
 
     /**
-     * @brief Constructor. The resulting ResourceHandle handle will be invalid.
+     * @brief Constructor. The resulting SequencerHandle handle will be invalid.
      */
-    ResourceHandle();
+    SequencerHandle();
 
     /**
      * @brief Copy-constructor.
      */
-    ResourceHandle(const ResourceHandle&);
+    SequencerHandle(const SequencerHandle&);
 
     /**
      * @brief Move-constructor.
      */
-    ResourceHandle(ResourceHandle&&);
+    SequencerHandle(SequencerHandle&&);
 
     /**
      * @brief Copy-assignment operator.
      */
-    ResourceHandle& operator=(const ResourceHandle&);
+    SequencerHandle& operator=(const SequencerHandle&);
 
     /**
      * @brief Move-assignment operator.
      */
-    ResourceHandle& operator=(ResourceHandle&&);
+    SequencerHandle& operator=(SequencerHandle&&);
 
     /**
      * @brief Destructor.
      */
-    ~ResourceHandle();
+    ~SequencerHandle();
 
     /**
      * @brief Returns the client this database has been opened with.
@@ -68,17 +68,17 @@ class ResourceHandle {
 
 
     /**
-     * @brief Checks if the ResourceHandle instance is valid.
+     * @brief Checks if the SequencerHandle instance is valid.
      */
     operator bool() const;
 
     /**
-     * @brief Sends an RPC to the resource to make it print a hello message.
+     * @brief Sends an RPC to the sequencer to make it print a hello message.
      */
     void sayHello() const;
 
     /**
-     * @brief Requests the target resource to compute the sum of two numbers.
+     * @brief Requests the target sequencer to compute the sum of two numbers.
      * If result is null, it will be ignored. If req is not null, this call
      * will be non-blocking and the caller is responsible for waiting on
      * the request.
@@ -96,13 +96,13 @@ class ResourceHandle {
 
     /**
      * @brief Constructor is private. Use a Client object
-     * to create a ResourceHandle instance.
+     * to create a SequencerHandle instance.
      *
      * @param impl Pointer to implementation.
      */
-    ResourceHandle(const std::shared_ptr<ResourceHandleImpl>& impl);
+    SequencerHandle(const std::shared_ptr<SequencerHandleImpl>& impl);
 
-    std::shared_ptr<ResourceHandleImpl> self;
+    std::shared_ptr<SequencerHandleImpl> self;
 };
 
 }

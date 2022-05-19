@@ -3,19 +3,19 @@
  *
  * See COPYRIGHT in top-level directory.
  */
-#include "alpha/Exception.hpp"
-#include "alpha/Client.hpp"
-#include "alpha/ResourceHandle.hpp"
-#include "alpha/RequestResult.hpp"
+#include "mobject/Exception.hpp"
+#include "mobject/Client.hpp"
+#include "mobject/SequencerHandle.hpp"
+#include "mobject/RequestResult.hpp"
 
 #include "ClientImpl.hpp"
-#include "ResourceHandleImpl.hpp"
+#include "SequencerHandleImpl.hpp"
 
 #include <thallium/serialization/stl/string.hpp>
 
 namespace tl = thallium;
 
-namespace alpha {
+namespace mobject {
 
 Client::Client() = default;
 
@@ -47,24 +47,24 @@ Client::operator bool() const {
     return static_cast<bool>(self);
 }
 
-ResourceHandle Client::makeResourceHandle(
+SequencerHandle Client::makeSequencerHandle(
         const std::string& address,
         uint16_t provider_id,
-        const UUID& resource_id,
+        const UUID& sequencer_id,
         bool check) const {
     auto endpoint  = self->m_engine.lookup(address);
     auto ph        = tl::provider_handle(endpoint, provider_id);
     RequestResult<bool> result;
     result.success() = true;
     if(check) {
-        result = self->m_check_resource.on(ph)(resource_id);
+        result = self->m_check_sequencer.on(ph)(sequencer_id);
     }
     if(result.success()) {
-        auto resource_impl = std::make_shared<ResourceHandleImpl>(self, std::move(ph), resource_id);
-        return ResourceHandle(resource_impl);
+        auto sequencer_impl = std::make_shared<SequencerHandleImpl>(self, std::move(ph), sequencer_id);
+        return SequencerHandle(sequencer_impl);
     } else {
         throw Exception(result.error());
-        return ResourceHandle(nullptr);
+        return SequencerHandle(nullptr);
     }
 }
 

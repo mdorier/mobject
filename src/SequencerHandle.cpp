@@ -3,68 +3,68 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#include "alpha/ResourceHandle.hpp"
-#include "alpha/RequestResult.hpp"
-#include "alpha/Exception.hpp"
+#include "mobject/SequencerHandle.hpp"
+#include "mobject/RequestResult.hpp"
+#include "mobject/Exception.hpp"
 
 #include "AsyncRequestImpl.hpp"
 #include "ClientImpl.hpp"
-#include "ResourceHandleImpl.hpp"
+#include "SequencerHandleImpl.hpp"
 
 #include <thallium/serialization/stl/string.hpp>
 #include <thallium/serialization/stl/pair.hpp>
 
-namespace alpha {
+namespace mobject {
 
-ResourceHandle::ResourceHandle() = default;
+SequencerHandle::SequencerHandle() = default;
 
-ResourceHandle::ResourceHandle(const std::shared_ptr<ResourceHandleImpl>& impl)
+SequencerHandle::SequencerHandle(const std::shared_ptr<SequencerHandleImpl>& impl)
 : self(impl) {}
 
-ResourceHandle::ResourceHandle(const ResourceHandle&) = default;
+SequencerHandle::SequencerHandle(const SequencerHandle&) = default;
 
-ResourceHandle::ResourceHandle(ResourceHandle&&) = default;
+SequencerHandle::SequencerHandle(SequencerHandle&&) = default;
 
-ResourceHandle& ResourceHandle::operator=(const ResourceHandle&) = default;
+SequencerHandle& SequencerHandle::operator=(const SequencerHandle&) = default;
 
-ResourceHandle& ResourceHandle::operator=(ResourceHandle&&) = default;
+SequencerHandle& SequencerHandle::operator=(SequencerHandle&&) = default;
 
-ResourceHandle::~ResourceHandle() = default;
+SequencerHandle::~SequencerHandle() = default;
 
-ResourceHandle::operator bool() const {
+SequencerHandle::operator bool() const {
     return static_cast<bool>(self);
 }
 
-Client ResourceHandle::client() const {
+Client SequencerHandle::client() const {
     return Client(self->m_client);
 }
 
-void ResourceHandle::sayHello() const {
-    if(not self) throw Exception("Invalid alpha::ResourceHandle object");
+void SequencerHandle::sayHello() const {
+    if(not self) throw Exception("Invalid mobject::SequencerHandle object");
     auto& rpc = self->m_client->m_say_hello;
     auto& ph  = self->m_ph;
-    auto& resource_id = self->m_resource_id;
-    rpc.on(ph)(resource_id);
+    auto& sequencer_id = self->m_sequencer_id;
+    rpc.on(ph)(sequencer_id);
 }
 
-void ResourceHandle::computeSum(
+void SequencerHandle::computeSum(
         int32_t x, int32_t y,
         int32_t* result,
         AsyncRequest* req) const
 {
-    if(not self) throw Exception("Invalid alpha::ResourceHandle object");
+    if(not self) throw Exception("Invalid mobject::SequencerHandle object");
     auto& rpc = self->m_client->m_compute_sum;
     auto& ph  = self->m_ph;
-    auto& resource_id = self->m_resource_id;
+    auto& sequencer_id = self->m_sequencer_id;
     if(req == nullptr) { // synchronous call
-        RequestResult<int32_t> response = rpc.on(ph)(resource_id, x, y);
+        RequestResult<int32_t> response = rpc.on(ph)(sequencer_id, x, y);
         if(response.success()) {
             if(result) *result = response.value();
         } else {
             throw Exception(response.error());
         }
     } else { // asynchronous call
-        auto async_response = rpc.on(ph).async(resource_id, x, y);
+        auto async_response = rpc.on(ph).async(sequencer_id, x, y);
         auto async_request_impl =
             std::make_shared<AsyncRequestImpl>(std::move(async_response));
         async_request_impl->m_wait_callback =

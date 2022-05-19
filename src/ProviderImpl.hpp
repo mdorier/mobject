@@ -3,11 +3,11 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#ifndef __ALPHA_PROVIDER_IMPL_H
-#define __ALPHA_PROVIDER_IMPL_H
+#ifndef __MOBJECT_PROVIDER_IMPL_H
+#define __MOBJECT_PROVIDER_IMPL_H
 
-#include "alpha/Backend.hpp"
-#include "alpha/UUID.hpp"
+#include "mobject/Backend.hpp"
+#include "mobject/UUID.hpp"
 
 #include <thallium.hpp>
 #include <thallium/serialization/stl/string.hpp>
@@ -18,22 +18,22 @@
 
 #include <tuple>
 
-#define FIND_RESOURCE(__var__) \
+#define FIND_SEQUENCER(__var__) \
         std::shared_ptr<Backend> __var__;\
         do {\
             std::lock_guard<tl::mutex> lock(m_backends_mtx);\
-            auto it = m_backends.find(resource_id);\
+            auto it = m_backends.find(sequencer_id);\
             if(it == m_backends.end()) {\
                 result.success() = false;\
-                result.error() = "Resource with UUID "s + resource_id.to_string() + " not found";\
+                result.error() = "Sequencer with UUID "s + sequencer_id.to_string() + " not found";\
                 req.respond(result);\
-                spdlog::error("[provider:{}] Resource {} not found", id(), resource_id.to_string());\
+                spdlog::error("[provider:{}] Sequencer {} not found", id(), sequencer_id.to_string());\
                 return;\
             }\
             __var__ = it->second;\
         }while(0)
 
-namespace alpha {
+namespace mobject {
 
 using namespace std::string_literals;
 namespace tl = thallium;
@@ -49,12 +49,12 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
     std::string          m_token;
     tl::pool             m_pool;
     // Admin RPC
-    tl::remote_procedure m_create_resource;
-    tl::remote_procedure m_open_resource;
-    tl::remote_procedure m_close_resource;
-    tl::remote_procedure m_destroy_resource;
+    tl::remote_procedure m_create_sequencer;
+    tl::remote_procedure m_open_sequencer;
+    tl::remote_procedure m_close_sequencer;
+    tl::remote_procedure m_destroy_sequencer;
     // Client RPC
-    tl::remote_procedure m_check_resource;
+    tl::remote_procedure m_check_sequencer;
     tl::remote_procedure m_say_hello;
     tl::remote_procedure m_compute_sum;
     // Backends
@@ -64,39 +64,39 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
     ProviderImpl(const tl::engine& engine, uint16_t provider_id, const tl::pool& pool)
     : tl::provider<ProviderImpl>(engine, provider_id)
     , m_pool(pool)
-    , m_create_resource(define("alpha_create_resource", &ProviderImpl::createResource, pool))
-    , m_open_resource(define("alpha_open_resource", &ProviderImpl::openResource, pool))
-    , m_close_resource(define("alpha_close_resource", &ProviderImpl::closeResource, pool))
-    , m_destroy_resource(define("alpha_destroy_resource", &ProviderImpl::destroyResource, pool))
-    , m_check_resource(define("alpha_check_resource", &ProviderImpl::checkResource, pool))
-    , m_say_hello(define("alpha_say_hello", &ProviderImpl::sayHello, pool))
-    , m_compute_sum(define("alpha_compute_sum",  &ProviderImpl::computeSum, pool))
+    , m_create_sequencer(define("mobject_create_sequencer", &ProviderImpl::createSequencer, pool))
+    , m_open_sequencer(define("mobject_open_sequencer", &ProviderImpl::openSequencer, pool))
+    , m_close_sequencer(define("mobject_close_sequencer", &ProviderImpl::closeSequencer, pool))
+    , m_destroy_sequencer(define("mobject_destroy_sequencer", &ProviderImpl::destroySequencer, pool))
+    , m_check_sequencer(define("mobject_check_sequencer", &ProviderImpl::checkSequencer, pool))
+    , m_say_hello(define("mobject_say_hello", &ProviderImpl::sayHello, pool))
+    , m_compute_sum(define("mobject_compute_sum",  &ProviderImpl::computeSum, pool))
     {
         spdlog::trace("[provider:{0}] Registered provider with id {0}", id());
     }
 
     ~ProviderImpl() {
         spdlog::trace("[provider:{}] Deregistering provider", id());
-        m_create_resource.deregister();
-        m_open_resource.deregister();
-        m_close_resource.deregister();
-        m_destroy_resource.deregister();
-        m_check_resource.deregister();
+        m_create_sequencer.deregister();
+        m_open_sequencer.deregister();
+        m_close_sequencer.deregister();
+        m_destroy_sequencer.deregister();
+        m_check_sequencer.deregister();
         m_say_hello.deregister();
         m_compute_sum.deregister();
         spdlog::trace("[provider:{}]    => done!", id());
     }
 
-    void createResource(const tl::request& req,
+    void createSequencer(const tl::request& req,
                         const std::string& token,
-                        const std::string& resource_type,
-                        const std::string& resource_config) {
+                        const std::string& sequencer_type,
+                        const std::string& sequencer_config) {
 
-        spdlog::trace("[provider:{}] Received createResource request", id());
-        spdlog::trace("[provider:{}]    => type = {}", id(), resource_type);
-        spdlog::trace("[provider:{}]    => config = {}", id(), resource_config);
+        spdlog::trace("[provider:{}] Received createSequencer request", id());
+        spdlog::trace("[provider:{}]    => type = {}", id(), sequencer_type);
+        spdlog::trace("[provider:{}]    => config = {}", id(), sequencer_config);
 
-        auto resource_id = UUID::generate();
+        auto sequencer_id = UUID::generate();
         RequestResult<UUID> result;
 
         if(m_token.size() > 0 && m_token != token) {
@@ -109,24 +109,24 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
 
         json json_config;
         try {
-            json_config = json::parse(resource_config);
+            json_config = json::parse(sequencer_config);
         } catch(json::parse_error& e) {
             result.error() = e.what();
             result.success() = false;
-            spdlog::error("[provider:{}] Could not parse resource configuration for resource {}",
-                    id(), resource_id.to_string());
+            spdlog::error("[provider:{}] Could not parse sequencer configuration for sequencer {}",
+                    id(), sequencer_id.to_string());
             req.respond(result);
             return;
         }
 
         std::unique_ptr<Backend> backend;
         try {
-            backend = ResourceFactory::createResource(resource_type, get_engine(), json_config);
+            backend = SequencerFactory::createSequencer(sequencer_type, get_engine(), json_config);
         } catch(const std::exception& ex) {
             result.success() = false;
             result.error() = ex.what();
-            spdlog::error("[provider:{}] Error when creating resource {} of type {}:",
-                    id(), resource_id.to_string(), resource_type);
+            spdlog::error("[provider:{}] Error when creating sequencer {} of type {}:",
+                    id(), sequencer_id.to_string(), sequencer_type);
             spdlog::error("[provider:{}]    => {}", id(), result.error());
             req.respond(result);
             return;
@@ -134,32 +134,32 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
 
         if(not backend) {
             result.success() = false;
-            result.error() = "Unknown resource type "s + resource_type;
-            spdlog::error("[provider:{}] Unknown resource type {} for resource {}",
-                    id(), resource_type, resource_id.to_string());
+            result.error() = "Unknown sequencer type "s + sequencer_type;
+            spdlog::error("[provider:{}] Unknown sequencer type {} for sequencer {}",
+                    id(), sequencer_type, sequencer_id.to_string());
             req.respond(result);
             return;
         } else {
             std::lock_guard<tl::mutex> lock(m_backends_mtx);
-            m_backends[resource_id] = std::move(backend);
-            result.value() = resource_id;
+            m_backends[sequencer_id] = std::move(backend);
+            result.value() = sequencer_id;
         }
         
         req.respond(result);
-        spdlog::trace("[provider:{}] Successfully created resource {} of type {}",
-                id(), resource_id.to_string(), resource_type);
+        spdlog::trace("[provider:{}] Successfully created sequencer {} of type {}",
+                id(), sequencer_id.to_string(), sequencer_type);
     }
 
-    void openResource(const tl::request& req,
+    void openSequencer(const tl::request& req,
                       const std::string& token,
-                      const std::string& resource_type,
-                      const std::string& resource_config) {
+                      const std::string& sequencer_type,
+                      const std::string& sequencer_config) {
 
-        spdlog::trace("[provider:{}] Received openResource request", id());
-        spdlog::trace("[provider:{}]    => type = {}", id(), resource_type);
-        spdlog::trace("[provider:{}]    => config = {}", id(), resource_config);
+        spdlog::trace("[provider:{}] Received openSequencer request", id());
+        spdlog::trace("[provider:{}]    => type = {}", id(), sequencer_type);
+        spdlog::trace("[provider:{}]    => config = {}", id(), sequencer_config);
 
-        auto resource_id = UUID::generate();
+        auto sequencer_id = UUID::generate();
         RequestResult<UUID> result;
 
         if(m_token.size() > 0 && m_token != token) {
@@ -172,24 +172,24 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
 
         json json_config;
         try {
-            json_config = json::parse(resource_config);
+            json_config = json::parse(sequencer_config);
         } catch(json::parse_error& e) {
             result.error() = e.what();
             result.success() = false;
-            spdlog::error("[provider:{}] Could not parse resource configuration for resource {}",
-                    id(), resource_id.to_string());
+            spdlog::error("[provider:{}] Could not parse sequencer configuration for sequencer {}",
+                    id(), sequencer_id.to_string());
             req.respond(result);
             return;
         }
 
         std::unique_ptr<Backend> backend;
         try {
-            backend = ResourceFactory::openResource(resource_type, get_engine(), json_config);
+            backend = SequencerFactory::openSequencer(sequencer_type, get_engine(), json_config);
         } catch(const std::exception& ex) {
             result.success() = false;
             result.error() = ex.what();
-            spdlog::error("[provider:{}] Error when opening resource {} of type {}:",
-                    id(), resource_id.to_string(), resource_type);
+            spdlog::error("[provider:{}] Error when opening sequencer {} of type {}:",
+                    id(), sequencer_id.to_string(), sequencer_type);
             spdlog::error("[provider:{}]    => {}", id(), result.error());
             req.respond(result);
             return;
@@ -197,27 +197,27 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
 
         if(not backend) {
             result.success() = false;
-            result.error() = "Unknown resource type "s + resource_type;
-            spdlog::error("[provider:{}] Unknown resource type {} for resource {}",
-                    id(), resource_type, resource_id.to_string());
+            result.error() = "Unknown sequencer type "s + sequencer_type;
+            spdlog::error("[provider:{}] Unknown sequencer type {} for sequencer {}",
+                    id(), sequencer_type, sequencer_id.to_string());
             req.respond(result);
             return;
         } else {
             std::lock_guard<tl::mutex> lock(m_backends_mtx);
-            m_backends[resource_id] = std::move(backend);
-            result.value() = resource_id;
+            m_backends[sequencer_id] = std::move(backend);
+            result.value() = sequencer_id;
         }
         
         req.respond(result);
-        spdlog::trace("[provider:{}] Successfully created resource {} of type {}",
-                id(), resource_id.to_string(), resource_type);
+        spdlog::trace("[provider:{}] Successfully created sequencer {} of type {}",
+                id(), sequencer_id.to_string(), sequencer_type);
     }
 
-    void closeResource(const tl::request& req,
+    void closeSequencer(const tl::request& req,
                         const std::string& token,
-                        const UUID& resource_id) {
-        spdlog::trace("[provider:{}] Received closeResource request for resource {}",
-                id(), resource_id.to_string());
+                        const UUID& sequencer_id) {
+        spdlog::trace("[provider:{}] Received closeSequencer request for sequencer {}",
+                id(), sequencer_id.to_string());
 
         RequestResult<bool> result;
 
@@ -232,25 +232,25 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
         {
             std::lock_guard<tl::mutex> lock(m_backends_mtx);
 
-            if(m_backends.count(resource_id) == 0) {
+            if(m_backends.count(sequencer_id) == 0) {
                 result.success() = false;
-                result.error() = "Resource "s + resource_id.to_string() + " not found";
+                result.error() = "Sequencer "s + sequencer_id.to_string() + " not found";
                 req.respond(result);
-                spdlog::error("[provider:{}] Resource {} not found", id(), resource_id.to_string());
+                spdlog::error("[provider:{}] Sequencer {} not found", id(), sequencer_id.to_string());
                 return;
             }
 
-            m_backends.erase(resource_id);
+            m_backends.erase(sequencer_id);
         }
         req.respond(result);
-        spdlog::trace("[provider:{}] Resource {} successfully closed", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Sequencer {} successfully closed", id(), sequencer_id.to_string());
     }
     
-    void destroyResource(const tl::request& req,
+    void destroySequencer(const tl::request& req,
                          const std::string& token,
-                         const UUID& resource_id) {
+                         const UUID& sequencer_id) {
         RequestResult<bool> result;
-        spdlog::trace("[provider:{}] Received destroyResource request for resource {}", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Received destroySequencer request for sequencer {}", id(), sequencer_id.to_string());
 
         if(m_token.size() > 0 && m_token != token) {
             result.success() = false;
@@ -263,50 +263,50 @@ class ProviderImpl : public tl::provider<ProviderImpl> {
         {
             std::lock_guard<tl::mutex> lock(m_backends_mtx);
 
-            if(m_backends.count(resource_id) == 0) {
+            if(m_backends.count(sequencer_id) == 0) {
                 result.success() = false;
-                result.error() = "Resource "s + resource_id.to_string() + " not found";
+                result.error() = "Sequencer "s + sequencer_id.to_string() + " not found";
                 req.respond(result);
-                spdlog::error("[provider:{}] Resource {} not found", id(), resource_id.to_string());
+                spdlog::error("[provider:{}] Sequencer {} not found", id(), sequencer_id.to_string());
                 return;
             }
 
-            result = m_backends[resource_id]->destroy();
-            m_backends.erase(resource_id);
+            result = m_backends[sequencer_id]->destroy();
+            m_backends.erase(sequencer_id);
         }
 
         req.respond(result);
-        spdlog::trace("[provider:{}] Resource {} successfully destroyed", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Sequencer {} successfully destroyed", id(), sequencer_id.to_string());
     }
 
-    void checkResource(const tl::request& req,
-                       const UUID& resource_id) {
-        spdlog::trace("[provider:{}] Received checkResource request for resource {}", id(), resource_id.to_string());
+    void checkSequencer(const tl::request& req,
+                       const UUID& sequencer_id) {
+        spdlog::trace("[provider:{}] Received checkSequencer request for sequencer {}", id(), sequencer_id.to_string());
         RequestResult<bool> result;
-        FIND_RESOURCE(resource);
+        FIND_SEQUENCER(sequencer);
         result.success() = true;
         req.respond(result);
-        spdlog::trace("[provider:{}] Code successfully executed on resource {}", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Code successfully executed on sequencer {}", id(), sequencer_id.to_string());
     }
 
     void sayHello(const tl::request& req,
-                  const UUID& resource_id) {
-        spdlog::trace("[provider:{}] Received sayHello request for resource {}", id(), resource_id.to_string());
+                  const UUID& sequencer_id) {
+        spdlog::trace("[provider:{}] Received sayHello request for sequencer {}", id(), sequencer_id.to_string());
         RequestResult<bool> result;
-        FIND_RESOURCE(resource);
-        resource->sayHello();
-        spdlog::trace("[provider:{}] Successfully executed sayHello on resource {}", id(), resource_id.to_string());
+        FIND_SEQUENCER(sequencer);
+        sequencer->sayHello();
+        spdlog::trace("[provider:{}] Successfully executed sayHello on sequencer {}", id(), sequencer_id.to_string());
     }
 
     void computeSum(const tl::request& req,
-                    const UUID& resource_id,
+                    const UUID& sequencer_id,
                     int32_t x, int32_t y) {
-        spdlog::trace("[provider:{}] Received sayHello request for resource {}", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Received sayHello request for sequencer {}", id(), sequencer_id.to_string());
         RequestResult<int32_t> result;
-        FIND_RESOURCE(resource);
-        result = resource->computeSum(x, y);
+        FIND_SEQUENCER(sequencer);
+        result = sequencer->computeSum(x, y);
         req.respond(result);
-        spdlog::trace("[provider:{}] Successfully executed computeSum on resource {}", id(), resource_id.to_string());
+        spdlog::trace("[provider:{}] Successfully executed computeSum on sequencer {}", id(), sequencer_id.to_string());
     }
 
 };

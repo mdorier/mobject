@@ -3,48 +3,48 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#include <alpha/Admin.hpp>
+#include <mobject/Admin.hpp>
 #include <cppunit/extensions/HelperMacros.h>
 
 extern thallium::engine engine;
-extern std::string resource_type;
+extern std::string sequencer_type;
 
 class AdminTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE( AdminTest );
-    CPPUNIT_TEST( testAdminCreateResource );
+    CPPUNIT_TEST( testAdminCreateSequencer );
     CPPUNIT_TEST_SUITE_END();
 
-    static constexpr const char* resource_config = "{ \"path\" : \"mydb\" }";
+    static constexpr const char* sequencer_config = "{ \"path\" : \"mydb\" }";
 
     public:
 
     void setUp() {}
     void tearDown() {}
 
-    void testAdminCreateResource() {
-        alpha::Admin admin(engine);
+    void testAdminCreateSequencer() {
+        mobject::Admin admin(engine);
         std::string addr = engine.self();
 
-        alpha::UUID resource_id;
-        // Create a valid Resource
-        CPPUNIT_ASSERT_NO_THROW_MESSAGE("admin.createResource should return a valid Resource",
-                resource_id = admin.createResource(addr, 0, resource_type, resource_config));
+        mobject::UUID sequencer_id;
+        // Create a valid Sequencer
+        CPPUNIT_ASSERT_NO_THROW_MESSAGE("admin.createSequencer should return a valid Sequencer",
+                sequencer_id = admin.createSequencer(addr, 0, sequencer_type, sequencer_config));
 
-        // Create a Resource with a wrong backend type
-        alpha::UUID bad_id;
-        CPPUNIT_ASSERT_THROW_MESSAGE("admin.createResource should throw an exception (wrong backend)",
-                bad_id = admin.createResource(addr, 0, "blabla", resource_config),
-                alpha::Exception);
+        // Create a Sequencer with a wrong backend type
+        mobject::UUID bad_id;
+        CPPUNIT_ASSERT_THROW_MESSAGE("admin.createSequencer should throw an exception (wrong backend)",
+                bad_id = admin.createSequencer(addr, 0, "blabla", sequencer_config),
+                mobject::Exception);
 
-        // Destroy the Resource
-        CPPUNIT_ASSERT_NO_THROW_MESSAGE("admin.destroyResource should not throw on valid Resource",
-            admin.destroyResource(addr, 0, resource_id));
+        // Destroy the Sequencer
+        CPPUNIT_ASSERT_NO_THROW_MESSAGE("admin.destroySequencer should not throw on valid Sequencer",
+            admin.destroySequencer(addr, 0, sequencer_id));
 
-        // Destroy an invalid Resource
-        CPPUNIT_ASSERT_THROW_MESSAGE("admin.destroyResource should throw on invalid Resource",
-            admin.destroyResource(addr, 0, bad_id),
-            alpha::Exception);
+        // Destroy an invalid Sequencer
+        CPPUNIT_ASSERT_THROW_MESSAGE("admin.destroySequencer should throw on invalid Sequencer",
+            admin.destroySequencer(addr, 0, bad_id),
+            mobject::Exception);
     }
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( AdminTest );

@@ -3,13 +3,13 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#ifndef __ALPHA_EXCEPTION_HPP
-#define __ALPHA_EXCEPTION_HPP
+#ifndef __MOBJECT_EXCEPTION_HPP
+#define __MOBJECT_EXCEPTION_HPP
 
 #include <exception>
 #include <string>
 
-namespace alpha {
+namespace mobject {
 
 class Exception : public std::exception {
 

@@ -3,12 +3,12 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#ifndef __ALPHA_ADMIN_IMPL_H
-#define __ALPHA_ADMIN_IMPL_H
+#ifndef __MOBJECT_ADMIN_IMPL_H
+#define __MOBJECT_ADMIN_IMPL_H
 
 #include <thallium.hpp>
 
-namespace alpha {
+namespace mobject {
 
 namespace tl = thallium;
 
@@ -17,17 +17,17 @@ class AdminImpl {
     public:
 
     tl::engine           m_engine;
-    tl::remote_procedure m_create_resource;
-    tl::remote_procedure m_open_resource;
-    tl::remote_procedure m_close_resource;
-    tl::remote_procedure m_destroy_resource;
+    tl::remote_procedure m_create_sequencer;
+    tl::remote_procedure m_open_sequencer;
+    tl::remote_procedure m_close_sequencer;
+    tl::remote_procedure m_destroy_sequencer;
 
     AdminImpl(const tl::engine& engine)
     : m_engine(engine)
-    , m_create_resource(m_engine.define("alpha_create_resource"))
-    , m_open_resource(m_engine.define("alpha_open_resource"))
-    , m_close_resource(m_engine.define("alpha_close_resource"))
-    , m_destroy_resource(m_engine.define("alpha_destroy_resource"))
+    , m_create_sequencer(m_engine.define("mobject_create_sequencer"))
+    , m_open_sequencer(m_engine.define("mobject_open_sequencer"))
+    , m_close_sequencer(m_engine.define("mobject_close_sequencer"))
+    , m_destroy_sequencer(m_engine.define("mobject_destroy_sequencer"))
     {}
 
     AdminImpl(margo_instance_id mid)

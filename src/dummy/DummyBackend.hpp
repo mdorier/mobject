@@ -6,14 +6,14 @@
 #ifndef __DUMMY_BACKEND_HPP
 #define __DUMMY_BACKEND_HPP
 
-#include <alpha/Backend.hpp>
+#include <mobject/Backend.hpp>
 
 using json = nlohmann::json;
 
 /**
- * Dummy implementation of an alpha Backend.
+ * Dummy implementation of an mobject Backend.
  */
-class DummyResource : public alpha::Backend {
+class DummySequencer : public mobject::Backend {
    
     json m_config;
 
@@ -22,33 +22,33 @@ class DummyResource : public alpha::Backend {
     /**
      * @brief Constructor.
      */
-    DummyResource(const json& config)
+    DummySequencer(const json& config)
     : m_config(config) {}
 
     /**
      * @brief Move-constructor.
      */
-    DummyResource(DummyResource&&) = default;
+    DummySequencer(DummySequencer&&) = default;
 
     /**
      * @brief Copy-constructor.
      */
-    DummyResource(const DummyResource&) = default;
+    DummySequencer(const DummySequencer&) = default;
 
     /**
      * @brief Move-assignment operator.
      */
-    DummyResource& operator=(DummyResource&&) = default;
+    DummySequencer& operator=(DummySequencer&&) = default;
 
     /**
      * @brief Copy-assignment operator.
      */
-    DummyResource& operator=(const DummyResource&) = default;
+    DummySequencer& operator=(const DummySequencer&) = default;
 
     /**
      * @brief Destructor.
      */
-    virtual ~DummyResource() = default;
+    virtual ~DummySequencer() = default;
 
     /**
      * @brief Prints Hello World.
@@ -63,37 +63,37 @@ class DummyResource : public alpha::Backend {
      *
      * @return a RequestResult containing the result.
      */
-    alpha::RequestResult<int32_t> computeSum(int32_t x, int32_t y) override;
+    mobject::RequestResult<int32_t> computeSum(int32_t x, int32_t y) override;
 
     /**
-     * @brief Destroys the underlying resource.
+     * @brief Destroys the underlying sequencer.
      *
      * @return a RequestResult<bool> instance indicating
      * whether the database was successfully destroyed.
      */
-    alpha::RequestResult<bool> destroy() override;
+    mobject::RequestResult<bool> destroy() override;
 
     /**
-     * @brief Static factory function used by the ResourceFactory to
-     * create a DummyResource.
+     * @brief Static factory function used by the SequencerFactory to
+     * create a DummySequencer.
      *
      * @param engine Thallium engine
-     * @param config JSON configuration for the resource
+     * @param config JSON configuration for the sequencer
      *
-     * @return a unique_ptr to a resource
+     * @return a unique_ptr to a sequencer
      */
-    static std::unique_ptr<alpha::Backend> create(const thallium::engine& engine, const json& config);
+    static std::unique_ptr<mobject::Backend> create(const thallium::engine& engine, const json& config);
 
     /**
-     * @brief Static factory function used by the ResourceFactory to
-     * open a DummyResource.
+     * @brief Static factory function used by the SequencerFactory to
+     * open a DummySequencer.
      *
      * @param engine Thallium engine
-     * @param config JSON configuration for the resource
+     * @param config JSON configuration for the sequencer
      *
-     * @return a unique_ptr to a resource
+     * @return a unique_ptr to a sequencer
      */
-    static std::unique_ptr<alpha::Backend> open(const thallium::engine& engine, const json& config);
+    static std::unique_ptr<mobject::Backend> open(const thallium::engine& engine, const json& config);
 };
 
 #endif

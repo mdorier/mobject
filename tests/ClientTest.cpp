@@ -4,47 +4,47 @@
  * See COPYRIGHT in top-level directory.
  */
 #include <cppunit/extensions/HelperMacros.h>
-#include <alpha/Client.hpp>
-#include <alpha/Admin.hpp>
+#include <mobject/Client.hpp>
+#include <mobject/Admin.hpp>
 
 extern thallium::engine engine;
-extern std::string resource_type;
+extern std::string sequencer_type;
 
 class ClientTest : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE( ClientTest );
-    CPPUNIT_TEST( testOpenResource );
+    CPPUNIT_TEST( testOpenSequencer );
     CPPUNIT_TEST_SUITE_END();
 
-    static constexpr const char* resource_config = "{ \"path\" : \"mydb\" }";
-    UUID resource_id;
+    static constexpr const char* sequencer_config = "{ \"path\" : \"mydb\" }";
+    UUID sequencer_id;
 
     public:
 
     void setUp() {
-        alpha::Admin admin(engine);
+        mobject::Admin admin(engine);
         std::string addr = engine.self();
-        resource_id = admin.createResource(addr, 0, resource_type, resource_config);
+        sequencer_id = admin.createSequencer(addr, 0, sequencer_type, sequencer_config);
     }
 
     void tearDown() {
-        alpha::Admin admin(engine);
+        mobject::Admin admin(engine);
         std::string addr = engine.self();
-        admin.destroyResource(addr, 0, resource_id);
+        admin.destroySequencer(addr, 0, sequencer_id);
     }
 
-    void testOpenResource() {
-        alpha::Client client(engine);
+    void testOpenSequencer() {
+        mobject::Client client(engine);
         std::string addr = engine.self();
         
-        Resource my_resource = client.open(addr, 0, resource_id);
+        Sequencer my_sequencer = client.open(addr, 0, sequencer_id);
         CPPUNIT_ASSERT_MESSAGE(
-                "Resource should be valid",
-                static_cast<bool>(my_resource));
+                "Sequencer should be valid",
+                static_cast<bool>(my_sequencer));
 
         auto bad_id = UUID::generate();
         CPPUNIT_ASSERT_THROW_MESSAGE(
-                "client.open should fail on non-existing resource",
+                "client.open should fail on non-existing sequencer",
                 client.open(addr, 0, bad_id);
     }
 };

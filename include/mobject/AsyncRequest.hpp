@@ -3,16 +3,16 @@
  * 
  * See COPYRIGHT in top-level directory.
  */
-#ifndef __ALPHA_ASYNC_REQUEST_HPP
-#define __ALPHA_ASYNC_REQUEST_HPP
+#ifndef __MOBJECT_ASYNC_REQUEST_HPP
+#define __MOBJECT_ASYNC_REQUEST_HPP
 
 #include <memory>
 #include <string>
 
-namespace alpha {
+namespace mobject {
 
 class AsyncRequestImpl;
-class ResourceHandle;
+class SequencerHandle;
 
 /**
  * @brief AsyncRequest objects are used to keep track of
@@ -20,7 +20,7 @@ class ResourceHandle;
  */
 class AsyncRequest {
 
-    friend ResourceHandle;
+    friend SequencerHandle;
 
     public:
 

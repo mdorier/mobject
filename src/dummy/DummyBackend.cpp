@@ -6,31 +6,31 @@
 #include "DummyBackend.hpp"
 #include <iostream>
 
-ALPHA_REGISTER_BACKEND(dummy, DummyResource);
+MOBJECT_REGISTER_BACKEND(dummy, DummySequencer);
 
-void DummyResource::sayHello() {
+void DummySequencer::sayHello() {
     std::cout << "Hello World" << std::endl;
 }
 
-alpha::RequestResult<int32_t> DummyResource::computeSum(int32_t x, int32_t y) {
-    alpha::RequestResult<int32_t> result;
+mobject::RequestResult<int32_t> DummySequencer::computeSum(int32_t x, int32_t y) {
+    mobject::RequestResult<int32_t> result;
     result.value() = x + y;
     return result;
 }
 
-alpha::RequestResult<bool> DummyResource::destroy() {
-    alpha::RequestResult<bool> result;
+mobject::RequestResult<bool> DummySequencer::destroy() {
+    mobject::RequestResult<bool> result;
     result.value() = true;
     // or result.success() = true
     return result;
 }
 
-std::unique_ptr<alpha::Backend> DummyResource::create(const thallium::engine& engine, const json& config) {
+std::unique_ptr<mobject::Backend> DummySequencer::create(const thallium::engine& engine, const json& config) {
     (void)engine;
-    return std::unique_ptr<alpha::Backend>(new DummyResource(config));
+    return std::unique_ptr<mobject::Backend>(new DummySequencer(config));
 }
 
-std::unique_ptr<alpha::Backend> DummyResource::open(const thallium::engine& engine, const json& config) {
+std::unique_ptr<mobject::Backend> DummySequencer::open(const thallium::engine& engine, const json& config) {
     (void)engine;
-    return std::unique_ptr<alpha::Backend>(new DummyResource(config));
+    return std::unique_ptr<mobject::Backend>(new DummySequencer(config));
 }
